@@ -271,14 +271,19 @@ class _CFRSolverBase(object):
 
     if state.is_chance_node():
       state_value = 0.0
+      rand = np.random.rand()
+      prob_sum = 0
       for action, action_prob in state.chance_outcomes():
         assert action_prob > 0
-        new_state = state.child(action)
-        new_reach_probabilities = reach_probabilities.copy()
-        new_reach_probabilities[-1] *= action_prob
-        self.num_infostates_expanded += 1
-        state_value += action_prob * self._compute_counterfactual_regret_for_player(
-            new_state, policies, new_reach_probabilities, player)
+        prob_sum += action_prob
+        if prob_sum>rand:
+          new_state = state.child(action)
+          new_reach_probabilities = reach_probabilities.copy()
+          # new_reach_probabilities[-1] *= action_prob
+          self.num_infostates_expanded += 1
+          state_value += action_prob * self._compute_counterfactual_regret_for_player(
+              new_state, policies, new_reach_probabilities, player)
+          break
       return state_value
 
     current_player = state.current_player()
